@@ -1,3 +1,4 @@
+#include <atomic>
 #include <chrono>
 #include <optional>
 #include <thread>
@@ -29,7 +30,7 @@ std::optional<esp_netif_ip_info_t> connectWifiRouter()
   }
 
   esp_netif_ip_info_t ip_info;
-  bool gotIp = false;
+  std::atomic_bool gotIp = false;
   wifi.register_sta("home",
                     {.ssid = CONFIG_ESP_WIFI_SSID,         // use whatever was saved to NVS (if any)
                      .password = CONFIG_ESP_WIFI_PASSWORD, // use whatever was saved to NVS (if any)
@@ -49,6 +50,7 @@ std::optional<esp_netif_ip_info_t> connectWifiRouter()
   int waitCount = 0;
   while (!gotIp && waitCount < 150) {
     std::this_thread::sleep_for(100ms);
+    ++waitCount;
   }
   if (gotIp) {
     return ip_info;
